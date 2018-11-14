@@ -1,11 +1,12 @@
 name: NYC_taxi_duration
 channels:
   - defaults
+  - conda-forge
 dependencies:
   - python=2.7
   - numpy=1.14.3
   - pandas=0.22.0
   - scikit-learn=0.19.1
-  - cython
+  - xgboost==0.71
   - pip:
     - mlflow
