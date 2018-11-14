@@ -3,13 +3,12 @@ import mlflow.sklearn
 
 import numpy as np
 import pandas as pd
-# import math
+import argparse
 
 from sklearn.cluster import KMeans
 import xgboost as xgb
 from sklearn.model_selection import train_test_split
 from sklearn.decomposition import PCA
-# from sklearn.cluster import MiniBatchKMeans
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 
 
@@ -22,7 +21,7 @@ def haversine_(lat1, lng1, lat2, lng2):
     lng = lng2 - lng1
     d = np.sin(lat * 0.5) ** 2 + np.cos(lat1) * np.cos(lat2) * np.sin(lng * 0.5) ** 2
     h = 2 * AVG_EARTH_RADIUS * np.arcsin(np.sqrt(d))
-    return(h)
+    return h
 
 
 def manhattan_distance_pd(lat1, lng1, lat2, lng2):
@@ -87,6 +86,18 @@ def eval_metrics(actual, pred):
 
 # Main
 def my_training_function(xgb_pars=None):
+
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument('max_depth', type=int)
+    parser.add_argument('xgb_lambda', type=float)
+
+    # Arguments
+    args = parser.parse_args()
+
+    xgb_pars = {'min_child_weight': 50, 'eta': 0.4, 'colsample_bytree': 0.3, 'max_depth': args.max_depth,
+                'subsample': 0.8, 'lambda': args.xgb_lambda, 'nthread': -1, 'booster' : 'gbtree', 'silent': 0,
+                'eval_metric': 'rmse', 'objective': 'reg:linear'}
 
     # Read data
     train_df = pd.read_csv("data/train.csv", sep=",", skipinitialspace=True)
@@ -260,12 +271,6 @@ def my_training_function(xgb_pars=None):
     dvalid = xgb.DMatrix(Xv, label=yv)
     dtest = xgb.DMatrix(test[feature_names].values)
     watchlist = [(dtrain, 'train'), (dvalid, 'valid')]
-
-    # Set default parameters
-    if xgb_pars is None:
-        xgb_pars = {'min_child_weight': 50, 'eta': 0.4, 'colsample_bytree': 0.3, 'max_depth': 15,
-                    'subsample': 0.8, 'lambda': 1., 'nthread': -1, 'booster' : 'gbtree', 'silent': 0,
-                    'eval_metric': 'rmse', 'objective': 'reg:linear'}
 
     # MLflow
     with mlflow.start_run():

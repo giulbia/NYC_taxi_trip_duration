@@ -1,0 +1,10 @@
+name: NYC_taxi_duration
+
+conda_env: conda.yaml
+
+entry_points:
+    main:
+        parameters:
+            max_depth: {type: int, default: 15}
+            xgb_lambda: {type: float, default: 1.}
+        command: "python NYC_taxi_trip_duration.py {max_depth} {xgb_lambda}"
